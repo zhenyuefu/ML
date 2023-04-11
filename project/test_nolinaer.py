@@ -1,30 +1,35 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
-from module import Linear, TanH, Sigmoid, ReLU
-from loss import MSELoss, CrossEntropyLoss
-from mltools import gen_arti, plot_frontiere_3d, plot_data_3d, plot_data, plot_frontiere
+from modules import Linear, TanH, Sigmoid, ReLU, MSELoss, CrossEntropyLoss
+from utils.mltools import (
+    gen_arti,
+    plot_frontiere_3d,
+    plot_data_3d,
+    plot_data,
+    plot_frontiere,
+)
 
 
 # Définir les paramètres d'entrée et de sortie
 input_size = 2
-hidden_size = 2
+hidden_size = 10
 output_size = 1
 
 # Définir les données d'entraînement
 X, Y = gen_arti(data_type=1)
 
 # Initialiser les modules
-w1 = np.ones((input_size, hidden_size))
-linear1 = Linear(input_size, hidden_size, w=w1)
+# w1 = np.ones((input_size, hidden_size))
+linear1 = Linear(input_size, hidden_size)
 tanh = TanH()
-w2 = np.asarray([1.0, -2.0]).reshape(hidden_size, output_size)
-linear2 = Linear(hidden_size, output_size, w=w2)
+# w2 = np.asarray([1.0, -2.0]).reshape(hidden_size, output_size)
+linear2 = Linear(hidden_size, output_size)
 sigmoid = Sigmoid()
 celoss = CrossEntropyLoss()
 
 # Boucle d'entraînement
-num_epochs = 100
+num_epochs = 10000
 for epoch in range(num_epochs):
     # Forward pass
     l1 = linear1.forward(X)
@@ -34,12 +39,12 @@ for epoch in range(num_epochs):
 
     # Calculer la perte
     loss = celoss.forward(Y, yhat)
-    if epoch % 10 == 0:
+    if epoch % 1000 == 0:
         print("Epoch %d: Loss = %f" % (epoch, loss.mean()))
 
     # Backward pass
     delta = celoss.backward(Y, yhat)
-    delta = sigmoid.backward_delta(yhat, delta)
+    delta = sigmoid.backward_delta(l2, delta)
     linear2.backward_update_gradient(tan, delta)
     delta = linear2.backward_delta(tan, delta)
     delta = tanh.backward_delta(l1, delta)

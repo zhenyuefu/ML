@@ -1,24 +1,27 @@
 import numpy as np
-from loss import MSELoss
+from modules.loss import MSELoss
 
-from module import Linear
+from modules.linear import Linear
 
-# use sklearn to generate data
-from sklearn.datasets import make_regression
 
-# Création des données
-X, y, coef = make_regression(
-    n_samples=100, n_features=5, noise=10, random_state=42, coef=True
-)
+np.random.seed(0)
+X = np.linspace(-10, 10, 100)
+X = X.reshape(-1, 1)
+
+y = 0.85 * X - 0.72
+
+e = np.random.normal(loc=0, scale=0.5, size=X.shape)
+
+y += e
 
 y = y.reshape(-1, 1)
 
 # Instanciation du module Linear et de la fonction de coût MSELoss
-linear = Linear(5, 1)
+linear = Linear(1, 1, bias=False)
 loss_fn = MSELoss()
 
 # Boucle d'apprentissage
-for i in range(1000):
+for i in range(101):
     # Forward pass
     y_pred = linear.forward(X)
     loss = loss_fn.forward(y, y_pred)
@@ -39,7 +42,7 @@ for i in range(1000):
 import matplotlib.pyplot as plt
 
 y_pred = linear.forward(X)
-plt.plot(y, label="y")
-plt.plot(y_pred, label="y_pred")
+plt.plot(y, "o", label="y")
+plt.plot(y_pred, "-", label="y_pred")
 plt.legend()
 plt.show()
