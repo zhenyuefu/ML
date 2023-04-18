@@ -1,7 +1,6 @@
 from matplotlib import pyplot as plt
-import numpy as np
 
-from modules import Linear, TanH, Sigmoid, ReLU, MSELoss, CrossEntropyLoss
+from modules import Linear, TanH, Sigmoid, CrossEntropyLoss
 from utils.mltools import (
     gen_arti,
     plot_frontiere_3d,
@@ -13,7 +12,7 @@ from utils.mltools import (
 
 # Définir les paramètres d'entrée et de sortie
 input_size = 2
-hidden_size = 10
+hidden_size = 13
 output_size = 1
 
 # Définir les données d'entraînement
@@ -29,7 +28,7 @@ sigmoid = Sigmoid()
 celoss = CrossEntropyLoss()
 
 # Boucle d'entraînement
-num_epochs = 10000
+num_epochs = 50000
 for epoch in range(num_epochs):
     # Forward pass
     l1 = linear1.forward(X)

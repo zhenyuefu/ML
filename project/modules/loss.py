@@ -19,12 +19,17 @@ class MSELoss(Loss):
 
 class CrossEntropyLoss(Loss):
     def forward(self, y, yhat):
-        y = np.clip(y, 1e-15, 1 - 1e-15)
-        yhat = np.clip(yhat, 1e-15, 1 - 1e-15)
-        loss = -np.mean(y * np.log(yhat) + (1 - y) * np.log(1 - yhat), axis=1)
-        return loss
+        yhat_max = np.max(yhat, axis=1, keepdims=True)
+        log_sum_exp = yhat_max + np.log(
+            np.sum(np.exp(yhat - yhat_max), axis=1, keepdims=True)
+        )
+        loss = -np.sum(y * (yhat - log_sum_exp), axis=1)
+        return np.mean(loss)
 
     def backward(self, y, yhat):
-        y = np.clip(y, 1e-15, 1 - 1e-15)
-        yhat = np.clip(yhat, 1e-15, 1 - 1e-15)
-        return (yhat - y) / (yhat * (1 - yhat)) / y.shape[0]
+        yhat_max = np.max(yhat, axis=1, keepdims=True)
+        log_sum_exp = yhat_max + np.log(
+            np.sum(np.exp(yhat - yhat_max), axis=1, keepdims=True)
+        )
+        softmax = np.exp(yhat - log_sum_exp)
+        return -(y - softmax) / y.shape[0]
