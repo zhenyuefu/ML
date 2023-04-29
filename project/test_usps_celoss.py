@@ -4,6 +4,7 @@ from modules.container import Sequential
 from modules.linear import Linear
 from modules.activation import Sigmoid, TanH
 from modules.loss import CrossEntropyLoss
+from optim.optimizer import Optimizer
 from optim.sgd import SGD
 
 
@@ -33,17 +34,10 @@ net = Sequential(
 
 loss = CrossEntropyLoss()
 
-optimizer = SGD(net, loss, learning_rate=0.2)
+optimizer = Optimizer(net, loss, learning_rate=0.2)
 
 
-for epoch in range(15000):
-    # sample random minibatch
-    idx = np.random.choice(X_train.shape[0], 150, replace=False)
-    X_batch = X_train[idx]
-    Y_batch = Y_train[idx]
-    loss_value = optimizer.step(X_batch, Y_batch)
-    if epoch % 500 == 0:
-        print(f"Epoch: {epoch}, Loss: {loss_value}")
+SGD(X_train, Y_train, batch_size=32, num_iterations=500, optimizer=optimizer)
 
 
 # Compute network output on test set
