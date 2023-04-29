@@ -16,7 +16,6 @@ def SGD(
             X = X[indices]
             Y = Y[indices]
 
-        epoch_loss = 0.0
         progress_bar = tqdm(range(iterations_per_epoch), desc=f"Epoch {epoch + 1}")
 
         for _ in progress_bar:
@@ -31,11 +30,8 @@ def SGD(
                 iteration_loss += batch_loss
 
             iteration_loss /= num_batches
-            epoch_loss += iteration_loss
 
             # Update the progress bar with the current loss
             progress_bar.set_postfix({"Loss": iteration_loss})
 
-        epoch_loss /= iterations_per_epoch
-        progress_bar.set_postfix({"Loss": epoch_loss})
         progress_bar.close()
