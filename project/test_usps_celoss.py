@@ -29,7 +29,6 @@ net = Sequential(
     Linear(256, 100),
     TanH(),
     Linear(100, 10),
-    Sigmoid(),
 )
 
 loss = CrossEntropyLoss()
@@ -37,7 +36,7 @@ loss = CrossEntropyLoss()
 optimizer = SGD(net, loss, learning_rate=0.2)
 
 
-for epoch in range(8000):
+for epoch in range(15000):
     # sample random minibatch
     idx = np.random.choice(X_train.shape[0], 150, replace=False)
     X_batch = X_train[idx]

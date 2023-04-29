@@ -56,6 +56,11 @@ class ReLU(Module):
 
 
 class SoftMax(Module):
+    r"""
+    SoftMax activation function
+    softmax(x) = exp(x) / sum(exp(x))
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -66,8 +71,9 @@ class SoftMax(Module):
         return softmax
 
     def backward_delta(self, input, delta):
-        softmax = self.forward(input)
-        return delta * (softmax * (1 - softmax))
+        out = self.forward(input)
+        dout = out * (1 - out)
+        return delta * dout
 
     def update_parameters(self, gradient_step=1e-3):
         pass
@@ -77,18 +83,19 @@ class SoftMax(Module):
 
 
 class LogSoftMax(Module):
-    def __init__(self):
-        r"""
-        LogSoftMax activation function
-        log_softmax(x) = x - log(sum(exp(x)))
-        """
+    r"""
+    LogSoftMax activation function
+    log_softmax(x) = x - log(sum(exp(x)))
+    """
 
+    def __init__(self):
         super().__init__()
 
     def forward(self, x):
         self._input_cache = x
-        e_x = np.exp(x - np.max(x, axis=1, keepdims=True))
-        log_softmax = x - np.log(np.sum(e_x, axis=1, keepdims=True))
+        x_max = np.max(x, axis=1, keepdims=True)
+        log_sum_exp = x_max + np.log(np.sum(np.exp(x - x_max), axis=1, keepdims=True))
+        log_softmax = x - log_sum_exp
         return log_softmax
 
     def backward_delta(self, input, delta):
