@@ -17,5 +17,5 @@ class Optimizer:
 
         # Update network parameters
         self.net.update_parameters(learning_rate=self.learning_rate)
-
+        self.net.zero_grad()
         return loss_value

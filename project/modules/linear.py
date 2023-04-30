@@ -31,3 +31,6 @@ class Linear(Module):
 
     def backward_delta(self, input, delta):
         return np.matmul(delta, self._parameters["weight"].T)
+
+    def set_weight(self, weight):
+        self._parameters["weight"] = weight

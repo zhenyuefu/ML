@@ -19,9 +19,15 @@ class Sequential(Module):
 
     def backward_update_gradient(self, input, delta):
         for module in reversed(self._modules.values()):
-            input = module._input_cache
-            module.backward_update_gradient(input, delta)
-            delta = module.backward_delta(input, delta)
+            module_input = module._input_cache
+            module.backward_update_gradient(module_input, delta)
+            delta = module.backward_delta(module_input, delta)
+
+    def backward_delta(self, input, delta):
+        for module in reversed(self._modules.values()):
+            module_input = module._input_cache
+            delta = module.backward_delta(module_input, delta)
+        return delta
 
     def update_parameters(self, learning_rate=1e-3):
         for module in self._modules.values():

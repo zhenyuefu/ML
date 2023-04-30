@@ -12,7 +12,7 @@ class Loss(object):
 
 class MSELoss(Loss):
     def forward(self, y: ndarray, yhat: ndarray):
-        return np.mean((yhat - y) ** 2, axis=1)
+        return np.mean((yhat - y) ** 2)
 
     def backward(self, y: ndarray, yhat: ndarray):
         return 2 * (yhat - y) / y.shape[0]
@@ -54,3 +54,18 @@ class CrossEntropyLoss(Loss):
         )
         softmax = np.exp(yhat - log_sum_exp)
         return -(y - softmax) / y.shape[0]
+
+
+class BCELoss(Loss):
+    def forward(self, y, yhat):
+        # Clipping yhat to avoid NaNs in log due to floating-point precision issues
+        y = np.clip(y, 1e-15, 1 - 1e-15)
+        yhat = np.clip(yhat, 1e-15, 1 - 1e-15)
+        loss = -(y * np.log(yhat) + (1 - y) * np.log(1 - yhat))
+        return np.mean(loss)
+
+    def backward(self, y, yhat):
+        # Clipping yhat to avoid NaNs in log due to floating-point precision issues
+        y = np.clip(y, 1e-15, 1 - 1e-15)
+        yhat = np.clip(yhat, 1e-15, 1 - 1e-15)
+        return (yhat - y) / (yhat * (1 - yhat)) / y.shape[0]
