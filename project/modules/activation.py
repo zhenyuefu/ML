@@ -12,7 +12,7 @@ class TanH(Module):
         return np.tanh(x)
 
     def backward_update_gradient(self, input, delta):
-        return delta
+        pass
 
     def backward_delta(self, input, delta):
         return delta * (1 - np.tanh(input) ** 2)
@@ -27,7 +27,7 @@ class Sigmoid(Module):
         return 1 / (1 + np.exp(-x))
 
     def backward_update_gradient(self, input, delta):
-        return delta
+        pass
 
     def backward_delta(self, input, delta):
         yhat = self.forward(input)
@@ -46,7 +46,7 @@ class ReLU(Module):
         return np.maximum(x, 0)
 
     def backward_update_gradient(self, input, delta):
-        return delta
+        pass
 
     def backward_delta(self, input, delta):
         return delta * (input > 0)
@@ -79,7 +79,7 @@ class SoftMax(Module):
         pass
 
     def backward_update_gradient(self, input, delta):
-        return delta
+        pass
 
 
 class LogSoftMax(Module):
@@ -104,7 +104,7 @@ class LogSoftMax(Module):
         return delta - np.sum(delta * softmax, axis=1, keepdims=True) * softmax
 
     def backward_update_gradient(self, input, delta):
-        return delta
+        pass
 
     def update_parameters(self, gradient_step=1e-3):
         pass
