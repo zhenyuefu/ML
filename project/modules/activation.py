@@ -49,7 +49,7 @@ class ReLU(Module):
         pass
 
     def backward_delta(self, input, delta):
-        return delta * (input > 0)
+        return delta * (input >= 0)
 
     def update_parameters(self, gradient_step=1e-3):
         pass

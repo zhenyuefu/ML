@@ -10,6 +10,8 @@ class Module(object):
         self._gradient = OrderedDict()
         self._modules = OrderedDict()
         self._input_cache = None
+        self._cache = OrderedDict()
+        self.is_training = True
 
     def forward(self, data):
         raise NotImplementedError

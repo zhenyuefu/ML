@@ -4,66 +4,105 @@ from numpy.lib.stride_tricks import as_strided
 from .module import Module
 
 
-class MaxPool1D(Module):
-    def __init__(self, k_size, stride):
+class MaxPool1d(Module):
+    def __init__(self, kernel_size, stride=None):
         super().__init__()
-        self.k_size = k_size
-        self.stride = stride
+        self.kernel_size = kernel_size
+
+        if stride is None:
+            self.stride = self.kernel_size
+        else:
+            self.stride = stride
 
     def forward(self, x):
-        self._input_cache = x
-        batch_size, length, chan_in = x.shape
-        output_length = (length - self.k_size) // self.stride + 1
-        output = np.zeros((batch_size, output_length, chan_in))
+        B, C, L = x.shape
+        oL = (L - self.kernel_size) // self.stride + 1
 
         strided_x = as_strided(
             x,
-            shape=(batch_size, output_length, self.k_size, chan_in),
+            shape=(B, C, oL, self.kernel_size),
             strides=(
                 x.strides[0],
-                x.strides[1] * self.stride,
                 x.strides[1],
+                x.strides[2] * self.stride,
                 x.strides[2],
             ),
         )
-        output = np.max(strided_x, axis=2)
+
+        output = np.max(strided_x, axis=-1)
+
+        if self.is_training:
+            maxs = output.repeat(self.stride, axis=2)
+            x_window = x[:, :, : oL * self.stride]
+            mask = np.equal(x_window, maxs)
+            self._input_cache = x
+            self._cache["mask"] = mask
 
         return output
 
     def backward_delta(self, input, delta):
-        batch_size, length, chan_in = input.shape
-        output_length = delta.shape[1]
+        mask = self._cache["mask"]
+        dA = delta.repeat(self.stride, axis=2)
+        dA = np.multiply(dA, mask)
+        pad = np.zeros(input.shape)
+        pad[:, :, : dA.shape[2]] = dA
+        return pad
 
-        delta_input = np.zeros_like(input)
-        strided_input = as_strided(
-            input,
-            shape=(batch_size, output_length, self.k_size, chan_in),
+    def backward_update_gradient(self, input, delta):
+        pass
+
+
+class MaxPool2d(Module):
+    def __init__(self, kernel_size, stride=None):
+        super().__init__()
+        if isinstance(kernel_size, int):
+            self.kh = self.kw = kernel_size
+        else:
+            self.kh, self.kw = kernel_size
+
+        if stride is None:
+            self.stride = (self.kh, self.kw)
+        elif isinstance(stride, int):
+            self.stride = (stride, stride)
+        else:
+            self.stride = stride
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        oH = (H - self.kh) // self.stride[0] + 1
+        oW = (W - self.kw) // self.stride[1] + 1
+
+        strided_x = as_strided(
+            x,
+            shape=(B, C, oH, oW, self.kh, self.kw),
             strides=(
-                input.strides[0],
-                input.strides[1] * self.stride,
-                input.strides[1],
-                input.strides[2],
+                x.strides[0],
+                x.strides[1],
+                x.strides[2] * self.stride[0],
+                x.strides[3] * self.stride[1],
+                x.strides[2],
+                x.strides[3],
             ),
         )
-        strided_delta_input = as_strided(
-            delta_input,
-            shape=(batch_size, output_length, self.k_size, chan_in),
-            strides=(
-                delta_input.strides[0],
-                delta_input.strides[1] * self.stride,
-                delta_input.strides[1],
-                delta_input.strides[2],
-            ),
-        )
 
-        mask = np.equal(strided_input, np.max(strided_input, axis=2, keepdims=True))
-        np.add.at(
-            strided_delta_input,
-            (slice(None), slice(None), slice(None), slice(None)),
-            np.multiply(delta[:, :, np.newaxis, :], mask),
-        )
+        output = np.max(strided_x, axis=(-2, -1))
 
-        return delta_input
+        if self.is_training:
+            maxs = output.repeat(2, axis=2).repeat(2, axis=3)
+            x_window = x[:, :, : oH * self.stride[0], : oW * self.stride[1]]
+            mask = np.equal(x_window, maxs)
+            self._input_cache = x
+            self._cache["mask"] = mask
+
+        return output
+
+    def backward_delta(self, input, delta):
+        mask = self._cache["mask"]
+        dA = delta.repeat(self.stride[0], axis=2).repeat(self.stride[1], axis=3)
+        dA = np.multiply(dA, mask)
+        pad = np.zeros(input.shape)
+        pad[:, :, : dA.shape[2], : dA.shape[3]] = dA
+        return pad
 
     def backward_update_gradient(self, input, delta):
         pass

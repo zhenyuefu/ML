@@ -2,7 +2,7 @@ import numpy as np
 import pickle as pkl
 from modules.container import Sequential
 from modules.linear import Linear
-from modules.activation import Sigmoid, TanH
+from modules.activation import TanH
 from modules.loss import CrossEntropyLoss
 from optim.optimizer import Optimizer
 from optim.sgd import SGD
@@ -46,3 +46,4 @@ output = net.forward(X_test)
 # Compute accuracy
 accuracy = np.mean(np.argmax(output, axis=1) == np.argmax(Y_test, axis=1))
 print(f"Accuracy: {accuracy}")
+# Accuracy: 0.9094 (with 500 iterations) Loss = 0.00451
