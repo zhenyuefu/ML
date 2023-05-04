@@ -26,7 +26,6 @@ class Linear(Module):
         self._gradient["weight"] = dw
         if self._parameters["bias"] is not None:
             db = np.matmul(delta.T, np.ones(input.shape[0]))
-            self._gradient["weight"] = dw
             self._gradient["bias"] = db
 
     def backward_delta(self, input, delta):

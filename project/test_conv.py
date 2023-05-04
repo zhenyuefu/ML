@@ -44,7 +44,7 @@ optimizer = Optimizer(net, loss, lr=1e-2)
 SGD(X_train, Y_train, batch_size=64, num_iterations=150, optimizer=optimizer)
 
 # Compute network output on test set
-net.is_training = False
+net.eval()
 output = net.forward(X_test)
 
 # Compute accuracy

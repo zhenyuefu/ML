@@ -46,7 +46,7 @@ class Conv1d(Module):
 
         output = np.einsum("srp, rpbl -> bsl", weights, x_stride)
         if bias is not None:
-            output += bias.reshape(1, oC, 1)
+            output += bias[:, None]
 
         assert output.shape == (B, oC, oL), "Output shape mismatch"
         return output
@@ -72,7 +72,7 @@ class Conv1d(Module):
 
         self._gradient["weights"] = dw
         if self._parameters["bias"] is not None:
-            db = np.sum(delta, axis=(0, 2))
+            db = np.sum(delta, axis=(0, -1))
             self._gradient["bias"] = db
 
     def backward_delta(self, input, delta):
@@ -97,11 +97,11 @@ class Conv1d(Module):
 
         # s: oC, r: iC, p: kL
         # s:oC p:kL, b:B, l:iL
-        # dA: b:B, r:iC, l:iL
-        dA = np.einsum("srp, spbl -> brl", W, delta_stride)
-        assert dA.shape == input.shape, "Delta shape mismatch"
+        # dx: b:B, r:iC, l:iL
+        dx = np.einsum("srp, spbl -> brl", W, delta_stride)
+        assert dx.shape == input.shape, "Delta shape mismatch"
 
-        return dA
+        return dx
 
 
 class Conv2d(Module):
@@ -118,12 +118,13 @@ class Conv2d(Module):
         else:
             self.stride = stride
 
-        self._parameters["weights"] = np.random.normal(
-            0, 0.02, (chan_out, chan_in, self.kh, self.kw)
-        )
+        shape = (chan_out, chan_in, self.kh, self.kw)
+        fan_in = np.prod(shape[1:])
+        std = np.sqrt(2.0 / fan_in)
+        self._parameters["weights"] = np.random.normal(0, std, shape)
 
         if bias:
-            self._parameters["bias"] = np.zeros(chan_out)
+            self._parameters["bias"] = np.ones(chan_out) * 0.01
         else:
             self._parameters["bias"] = None
 
@@ -156,12 +157,16 @@ class Conv2d(Module):
         # x_stride: (r:iC, p:kH, q:kW, b:B, h:oH, w:oW)
         output = np.einsum("srpq, rpqbhw -> bshw", weights, x_stride)
         if bias is not None:
-            output += bias.reshape(1, oC, 1, 1)
+            output += bias[:, None, None]
 
         assert output.shape == (B, oC, oH, oW), "Output shape mismatch"
         return output
 
     def backward_update_gradient(self, input, delta):
+        r"""
+        :math: \delta_w = input \star delta
+        :math: \delta_b = \sum_{b, h, w} delta_{b, c, h, w}
+        """
         B, C, iH, iW = input.shape
         oC, iC, kH, kW = self._parameters["weights"].shape
         _, _, oH, oW = delta.shape
@@ -182,16 +187,19 @@ class Conv2d(Module):
 
         self._gradient["weights"] = dw
         if self._parameters["bias"] is not None:
-            db = np.sum(delta, axis=(0, 2, 3))
+            db = np.sum(delta, axis=(0, -1, -2))
             self._gradient["bias"] = db
 
     def backward_delta(self, input, delta):
+        r"""
+        :math: \delta_{l-1} = \delta \star rot180(W)
+        """
         B, C, iH, iW = input.shape
         oC, iC, kH, kW = self._parameters["weights"].shape
         B, oC, oH, oW = delta.shape
 
         W = self._parameters["weights"]
-        W = np.rot90(W, 2, axes=(2, 3))
+        W = np.flip(W, axis=(-1, -2))
 
         shape = (oC, kH, kW, B, iH, iW)
         strides = (oH * oW, oW, 1, oC * oH * oW, oW * self.stride[0], self.stride[1])
@@ -206,8 +214,8 @@ class Conv2d(Module):
 
         # s: oC, r: iC, p: kH, q: kW
         # s:oC p:kH q:kW, b:B, h:iH, w:iW
-        # dA: b:B, r:iC, h:iH, w:iW
-        dA = np.einsum("srpq, spqbhw -> brhw", W, delta_stride)
-        assert dA.shape == input.shape, "Delta shape mismatch"
+        # dx: b:B, r:iC, h:iH, w:iW
+        dx = np.einsum("srpq, spqbhw -> brhw", W, delta_stride)
+        assert dx.shape == input.shape, "Delta shape mismatch"
 
-        return dA
+        return dx

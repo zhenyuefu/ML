@@ -5,6 +5,7 @@ class Module(object):
     """
     Base class for all neural network modules.
     """
+
     def __init__(self):
         self._parameters = OrderedDict()
         self._gradient = OrderedDict()
@@ -53,4 +54,7 @@ class Module(object):
             raise KeyError('module name can\'t be empty string ""')
         self._modules[name] = module
 
-    
+    def eval(self):
+        self.is_training = False
+        for module in self._modules.values():
+            module.eval()

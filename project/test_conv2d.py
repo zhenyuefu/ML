@@ -29,21 +29,18 @@ Y_train = one_hot(Y_train)
 Y_test = one_hot(Y_test)
 
 # Normalize data
-mean = np.mean(X_train)
-std = np.std(X_train)
-X_train = (X_train - mean) / std
-X_test = (X_test - mean) / std
+# mean = np.mean(X_train)
+# std = np.std(X_train)
+# X_train = (X_train - mean) / std
+# X_test = (X_test - mean) / std
 
 # Create LeNet model
 net = Sequential(
-    Conv2d(1, 6, kernel_size=2),
-    ReLU(),
-    MaxPool2d(2, 2),
-    Conv2d(6, 16, kernel_size=2),
+    Conv2d(1, 32, kernel_size=3),
     ReLU(),
     MaxPool2d(2, 2),
     Flatten(),
-    Linear(144, 120),
+    Linear(1568, 120),
     ReLU(),
     Linear(120, 84),
     ReLU(),
@@ -57,7 +54,7 @@ optimizer = Optimizer(net, loss, lr=1e-3)
 SGD(X_train, Y_train, batch_size=64, num_iterations=100, optimizer=optimizer)
 
 # Compute network output on test set
-net.is_training = False
+net.eval()
 output = net.forward(X_test)
 
 # Compute accuracy
