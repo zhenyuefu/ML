@@ -39,14 +39,15 @@ net = Sequential(
 
 loss = CrossEntropyLoss()
 
-optimizer = Optimizer(net, loss, learning_rate=1e-2)
+optimizer = Optimizer(net, loss, lr=1e-2)
 
-SGD(X_train, Y_train, batch_size=64, num_iterations=50, optimizer=optimizer)
+SGD(X_train, Y_train, batch_size=64, num_iterations=150, optimizer=optimizer)
 
 # Compute network output on test set
+net.is_training = False
 output = net.forward(X_test)
 
 # Compute accuracy
 accuracy = np.mean(np.argmax(output, axis=1) == np.argmax(Y_test, axis=1))
 print(f"Accuracy: {accuracy}")
-# 40 iter loss:0.269 acc:0.900
+# 150 iter loss:0.0672 acc:0.9322

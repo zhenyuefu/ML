@@ -1,8 +1,8 @@
 class Optimizer:
-    def __init__(self, net, loss, learning_rate):
+    def __init__(self, net, loss, lr):
         self.net = net
         self.loss = loss
-        self.learning_rate = learning_rate
+        self.lr = lr
 
     def step(self, batch_x, batch_y) -> float:
         # Compute network output
@@ -16,6 +16,6 @@ class Optimizer:
         self.net.backward_update_gradient(batch_x, delta)
 
         # Update network parameters
-        self.net.update_parameters(learning_rate=self.learning_rate)
+        self.net.update_parameters(lr=self.lr)
         self.net.zero_grad()
         return loss_value

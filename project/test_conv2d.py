@@ -5,7 +5,7 @@ from modules.conv import Conv2d
 from modules.flatten import Flatten
 from modules.pooling import MaxPool2d
 from modules.linear import Linear
-from modules.activation import ReLU
+from modules.activation import ReLU, Sigmoid, TanH
 from modules.loss import CrossEntropyLoss
 from optim.optimizer import Optimizer
 from optim.sgd import SGD
@@ -28,6 +28,12 @@ def one_hot(y):
 Y_train = one_hot(Y_train)
 Y_test = one_hot(Y_test)
 
+# Normalize data
+mean = np.mean(X_train)
+std = np.std(X_train)
+X_train = (X_train - mean) / std
+X_test = (X_test - mean) / std
+
 # Create LeNet model
 net = Sequential(
     Conv2d(1, 6, kernel_size=2),
@@ -45,12 +51,13 @@ net = Sequential(
 )
 
 loss = CrossEntropyLoss()
-optimizer = Optimizer(net, loss, learning_rate=1e-2)
+optimizer = Optimizer(net, loss, lr=1e-3)
 
 # Train the model
 SGD(X_train, Y_train, batch_size=64, num_iterations=100, optimizer=optimizer)
 
 # Compute network output on test set
+net.is_training = False
 output = net.forward(X_test)
 
 # Compute accuracy

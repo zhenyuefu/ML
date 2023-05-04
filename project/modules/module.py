@@ -22,10 +22,10 @@ class Module(object):
     def backward_delta(self, input, delta):
         raise NotImplementedError
 
-    def update_parameters(self, learning_rate=1e-3):
+    def update_parameters(self, lr=1e-3):
         for param_name, gradient in self._gradient.items():
             param_value = self._parameters[param_name]
-            self._parameters[param_name] = param_value - learning_rate * gradient
+            self._parameters[param_name] = param_value - lr * gradient
 
     def zero_grad(self):
         self._gradient.clear()

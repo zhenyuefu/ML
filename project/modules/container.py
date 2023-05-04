@@ -29,9 +29,9 @@ class Sequential(Module):
             delta = module.backward_delta(module_input, delta)
         return delta
 
-    def update_parameters(self, learning_rate=1e-3):
+    def update_parameters(self, lr=1e-3):
         for module in self._modules.values():
-            module.update_parameters(learning_rate)
+            module.update_parameters(lr)
 
     def zero_grad(self):
         for module in self._modules.values():

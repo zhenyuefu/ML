@@ -14,7 +14,8 @@ class Linear(Module):
             self._parameters["bias"] = None
 
     def forward(self, x):
-        self._input_cache = x
+        if self.is_training:
+            self._input_cache = x
         yhat = np.matmul(x, self._parameters["weight"])
         if self._parameters["bias"] is not None:
             yhat += self._parameters["bias"]

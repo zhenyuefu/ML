@@ -34,7 +34,7 @@ net = Sequential(
 
 loss = CrossEntropyLoss()
 
-optimizer = Optimizer(net, loss, learning_rate=0.02)
+optimizer = Optimizer(net, loss, lr=0.02)
 
 
 SGD(X_train, Y_train, batch_size=32, num_iterations=500, optimizer=optimizer)

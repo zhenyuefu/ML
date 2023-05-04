@@ -70,10 +70,10 @@ class Conv1d(Module):
         dw = np.einsum("bsl, rpbl -> srp", delta, x_stride)
         assert dw.shape == self._parameters["weights"].shape, "Gradient shape mismatch"
 
-        db = np.sum(delta, axis=(0, 2))
-
         self._gradient["weights"] = dw
-        self._gradient["bias"] = db
+        if self._parameters["bias"] is not None:
+            db = np.sum(delta, axis=(0, 2))
+            self._gradient["bias"] = db
 
     def backward_delta(self, input, delta):
         B, C, iL = input.shape
@@ -180,10 +180,10 @@ class Conv2d(Module):
         dw = np.einsum("bshw, rpqbhw -> srpq", delta, x_stride)
         assert dw.shape == self._parameters["weights"].shape, "Gradient shape mismatch"
 
-        db = np.sum(delta, axis=(0, 2, 3))
-
         self._gradient["weights"] = dw
-        self._gradient["bias"] = db
+        if self._parameters["bias"] is not None:
+            db = np.sum(delta, axis=(0, 2, 3))
+            self._gradient["bias"] = db
 
     def backward_delta(self, input, delta):
         B, C, iH, iW = input.shape
