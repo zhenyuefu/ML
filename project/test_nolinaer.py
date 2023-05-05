@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 
 from modules import Linear, TanH, Sigmoid, CrossEntropyLoss
+from modules.loss import BCELoss
 from utils.mltools import (
     gen_arti,
     plot_frontiere_3d,
@@ -25,10 +26,11 @@ tanh = TanH()
 # w2 = np.asarray([1.0, -2.0]).reshape(hidden_size, output_size)
 linear2 = Linear(hidden_size, output_size)
 sigmoid = Sigmoid()
-celoss = CrossEntropyLoss()
+celoss = BCELoss()
+losses = []
 
 # Boucle d'entraînement
-num_epochs = 50000
+num_epochs = 100000
 for epoch in range(num_epochs):
     # Forward pass
     l1 = linear1.forward(X)
@@ -38,8 +40,9 @@ for epoch in range(num_epochs):
 
     # Calculer la perte
     loss = celoss.forward(Y, yhat)
-    if epoch % 1000 == 0:
+    if epoch % 2000 == 0:
         print("Epoch %d: Loss = %f" % (epoch, loss.mean()))
+    losses.append((epoch, loss.mean()))
 
     # Backward pass
     delta = celoss.backward(Y, yhat)
@@ -58,8 +61,13 @@ for epoch in range(num_epochs):
     linear2.zero_grad()
 
 # Afficher les résultats
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
+fig = plt.figure(figsize=(15, 5))
+fig.suptitle("Non-linear classification")
+
+ax = fig.add_subplot(131, projection="3d")
+fig.subplots_adjust(
+    left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.2, hspace=0.2
+)
 plot_frontiere_3d(
     ax,
     X,
@@ -69,7 +77,7 @@ plot_frontiere_3d(
 
 plot_data_3d(ax, X, Y)
 
-plt.show()
+fig.add_subplot(132, aspect="equal")
 
 plot_frontiere(
     X,
@@ -78,4 +86,11 @@ plot_frontiere(
 )
 
 plot_data(X, Y)
-plt.show()
+
+fig.add_subplot(133)
+
+plt.plot([x[0] for x in losses], [x[1] for x in losses], "-")
+plt.xlabel("iteration")
+plt.ylabel("loss")
+plt.title("loss")
+plt.savefig("test_nonlinear.png")
