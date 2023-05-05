@@ -1,6 +1,8 @@
 import numpy as np
 from tqdm import tqdm
 
+from modules import loss
+
 
 def SGD(
     X, Y, batch_size, num_iterations, optimizer, shuffle=True, iterations_per_epoch=50
@@ -10,6 +12,7 @@ def SGD(
 
     num_epochs = num_iterations // iterations_per_epoch
 
+    loss_history = []
     for epoch in range(num_epochs):
         if shuffle:
             indices = np.random.permutation(num_samples)
@@ -33,5 +36,8 @@ def SGD(
 
             # Update the progress bar with the current loss
             progress_bar.set_postfix({"Loss": iteration_loss})
+            loss_history.append(iteration_loss)
 
         progress_bar.close()
+
+    return loss_history

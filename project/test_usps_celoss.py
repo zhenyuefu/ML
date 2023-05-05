@@ -6,6 +6,7 @@ from modules.activation import TanH
 from modules.loss import CrossEntropyLoss
 from optim.optimizer import Optimizer
 from optim.sgd import SGD
+from utils.plot import plot_loss
 
 
 data = pkl.load(open("data/usps.pkl", "rb"))
@@ -34,10 +35,20 @@ net = Sequential(
 
 loss = CrossEntropyLoss()
 
-optimizer = Optimizer(net, loss, lr=0.02)
+learning_rate = 0.02
+batch_size = 32
+num_iterations = 100
+
+optimizer = Optimizer(net, loss, lr=learning_rate)
 
 
-SGD(X_train, Y_train, batch_size=32, num_iterations=500, optimizer=optimizer)
+loss_list = SGD(
+    X_train,
+    Y_train,
+    batch_size=batch_size,
+    num_iterations=num_iterations,
+    optimizer=optimizer,
+)
 
 
 # Compute network output on test set
@@ -47,3 +58,8 @@ output = net.forward(X_test)
 accuracy = np.mean(np.argmax(output, axis=1) == np.argmax(Y_test, axis=1))
 print(f"Accuracy: {accuracy}")
 # Accuracy: 0.9094 (with 500 iterations) Loss = 0.00451
+
+# Plot loss
+plot_loss(
+    loss_list, accuracy, batch_size, num_iterations, learning_rate, "usps_loss.png"
+)

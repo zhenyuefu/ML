@@ -41,7 +41,17 @@ loss = CrossEntropyLoss()
 
 optimizer = Optimizer(net, loss, lr=1e-2)
 
-SGD(X_train, Y_train, batch_size=64, num_iterations=150, optimizer=optimizer)
+loss_list = SGD(
+    X_train, Y_train, batch_size=64, num_iterations=150, optimizer=optimizer
+)
+
+# Plot loss
+import matplotlib.pyplot as plt
+
+plt.plot(loss_list)
+plt.xlabel("Iteration")
+plt.ylabel("Loss")
+plt.savefig("usps_loss.png")
 
 # Compute network output on test set
 net.eval()
