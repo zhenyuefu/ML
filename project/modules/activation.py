@@ -26,7 +26,7 @@ class Sigmoid(Module):
     def forward(self, x):
         if self.is_training:
             self._input_cache = x
-        return 1 / (1 + np.exp(-x))
+        return 1.0 / (1.0 + np.exp(-x))
 
     def backward_update_gradient(self, input, delta):
         pass

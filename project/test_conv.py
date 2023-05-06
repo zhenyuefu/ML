@@ -9,6 +9,12 @@ from modules.activation import ReLU
 from modules.loss import CrossEntropyLoss
 from optim.optimizer import Optimizer
 from optim.sgd import SGD
+from utils.plot import plot_loss
+
+# Parameters
+learning_rate = 1e-2
+num_iterations = 150
+batch_size = 64
 
 # Load data
 data = pkl.load(open("data/usps.pkl", "rb"))
@@ -39,19 +45,15 @@ net = Sequential(
 
 loss = CrossEntropyLoss()
 
-optimizer = Optimizer(net, loss, lr=1e-2)
+optimizer = Optimizer(net, loss, lr=learning_rate)
 
 loss_list = SGD(
-    X_train, Y_train, batch_size=64, num_iterations=150, optimizer=optimizer
+    X_train,
+    Y_train,
+    batch_size=batch_size,
+    num_iterations=num_iterations,
+    optimizer=optimizer,
 )
-
-# Plot loss
-import matplotlib.pyplot as plt
-
-plt.plot(loss_list)
-plt.xlabel("Iteration")
-plt.ylabel("Loss")
-plt.savefig("usps_loss.png")
 
 # Compute network output on test set
 net.eval()
@@ -61,3 +63,13 @@ output = net.forward(X_test)
 accuracy = np.mean(np.argmax(output, axis=1) == np.argmax(Y_test, axis=1))
 print(f"Accuracy: {accuracy}")
 # 150 iter loss:0.0672 acc:0.9322
+
+# Plot loss
+plot_loss(
+    loss_list,
+    accuracy,
+    batch_size,
+    num_iterations,
+    learning_rate,
+    "Conv1d USPS",
+)

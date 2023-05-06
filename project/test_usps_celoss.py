@@ -2,7 +2,7 @@ import numpy as np
 import pickle as pkl
 from modules.container import Sequential
 from modules.linear import Linear
-from modules.activation import TanH
+from modules.activation import ReLU, TanH
 from modules.loss import CrossEntropyLoss
 from optim.optimizer import Optimizer
 from optim.sgd import SGD
@@ -29,7 +29,7 @@ Y_test = one_hot(Y_test)
 
 net = Sequential(
     Linear(256, 100),
-    TanH(),
+    ReLU(),
     Linear(100, 10),
 )
 
@@ -37,7 +37,7 @@ loss = CrossEntropyLoss()
 
 learning_rate = 0.02
 batch_size = 32
-num_iterations = 100
+num_iterations = 150
 
 optimizer = Optimizer(net, loss, lr=learning_rate)
 

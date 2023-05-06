@@ -9,7 +9,7 @@ class Linear(Module):
         self.out_features = out_features
         self._parameters["weight"] = 2 * np.random.rand(in_features, out_features) - 1
         if bias:
-            self._parameters["bias"] = np.zeros(out_features)
+            self._parameters["bias"] = np.zeros(out_features, dtype=float)
         else:
             self._parameters["bias"] = None
 
@@ -18,14 +18,14 @@ class Linear(Module):
             self._input_cache = x
         yhat = np.matmul(x, self._parameters["weight"])
         if self._parameters["bias"] is not None:
-            yhat += self._parameters["bias"]
+            yhat = yhat + self._parameters["bias"]
         return yhat
 
     def backward_update_gradient(self, input, delta):
         dw = np.matmul(input.T, delta)
         self._gradient["weight"] = dw
         if self._parameters["bias"] is not None:
-            db = np.matmul(delta.T, np.ones(input.shape[0]))
+            db = np.matmul(delta.T, np.ones(input.shape[0], dtype=float))
             self._gradient["bias"] = db
 
     def backward_delta(self, input, delta):

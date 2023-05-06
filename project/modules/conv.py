@@ -12,12 +12,12 @@ class Conv1d(Module):
         self.kernel_size = kernel_size
         self.stride = stride
 
-        self._parameters["weights"] = np.random.normal(
-            0, 0.02, (chan_out, chan_in, self.kernel_size)
+        self._parameters["weights"] = (
+            np.random.rand(chan_out, chan_in, self.kernel_size) * 0.02
         )
 
         if bias:
-            self._parameters["bias"] = np.zeros(chan_out)
+            self._parameters["bias"] = np.zeros(chan_out, dtype=float)
         else:
             self._parameters["bias"] = None
 
@@ -119,12 +119,10 @@ class Conv2d(Module):
             self.stride = stride
 
         shape = (chan_out, chan_in, self.kh, self.kw)
-        fan_in = np.prod(shape[1:])
-        std = np.sqrt(2.0 / fan_in)
-        self._parameters["weights"] = np.random.normal(0, std, shape)
+        self._parameters["weights"] = np.random.randn(*shape) * 0.02
 
         if bias:
-            self._parameters["bias"] = np.ones(chan_out) * 0.01
+            self._parameters["bias"] = np.zeros(chan_out, dtype=float)
         else:
             self._parameters["bias"] = None
 
